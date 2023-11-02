@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,6 +9,7 @@ from tensorflow import keras
 from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping
 from sdv.single_table import CTGANSynthesizer
 from sdv.metadata import SingleTableMetadata
+from imblearn.over_sampling import ADASYN
 
 train_data =  pd.read_csv("./data/train_OG.csv")
 test_data =  pd.read_csv("./data/test_OG.csv")
@@ -24,7 +26,7 @@ def random_undersample(train_data):
 
 
 def GANsampling(train_data,no_of_samples = 50000):
-    data = train_data.drop(columns = ["gene_id","Transcript_ID", "Base_seq"])
+    data = train_data.drop(columns = ["gene_id","Transcript_ID"])
     metadata = SingleTableMetadata()
     metadata.detect_from_dataframe(data=data)
     metadata.update_column("label",sdtype="categorical")
@@ -40,11 +42,20 @@ def GANsampling(train_data,no_of_samples = 50000):
     output = pd.concat([data,New_positive],axis = 0, ignore_index = True) 
     return output
 
-new_train_data = GANsampling(train_data)
+def adasyn_sample(train):
+    X = train.drop(columns = ["label","gene_id","Transcript_ID","Base_seq"])
+    y = train['label']
+    adasyn_model = ADASYN(sampling_strategy='auto', random_state=42)
+    X_adasyn_sample, y_adasyn_sample = adasyn_model.fit_resample(X, y)
+    output = pd.concat([X_adasyn_sample, y_adasyn_sample], axis=1)
+    return output
+'''
+new_train_data = random_undersample(train_data)
 X_train = new_train_data.drop('label', axis=1)
 Y_train = new_train_data['label']
 X_test = test_data.drop(columns = ["label","gene_id","Transcript_ID","Base_seq"],axis = 1)
 Y_test = test_data['label']
+'''
 #print(train_data.head())
 def base_seq_one_hot(rows):
     base_seq = rows["Base_seq"]
@@ -60,8 +71,8 @@ def base_seq_one_hot(rows):
         else:
             output[(i+1)*4 - 1] = 1
     return output
-'''
-one_hot_encode_train_OG = GANsampling(train_data)
+
+one_hot_encode_train_OG = random_undersample(train_data)
 one_hot_encode_test_OG = test_data.copy()
 
 one_hot_encode_train_OG["One_hot_encode_base_seq"] = one_hot_encode_train_OG.apply(base_seq_one_hot,axis=1)
@@ -84,21 +95,23 @@ X_train = one_hot_encode_train_OG.drop(['label',"Position","Base_seq","One_hot_e
 Y_train = one_hot_encode_train_OG['label']
 X_test = one_hot_encode_test_OG.drop(columns = ["One_hot_encode_base_seq","label","gene_id","Transcript_ID","Base_seq","Position"],axis = 1)
 Y_test = one_hot_encode_test_OG['label']
-'''
+
 #print(X_train.head())
 from sklearn.metrics import accuracy_score
 
+ep = 200
+num = 2
 def lr_schedule(epoch):
-    if epoch < 25:
+    if epoch < 25 * num:
         return 0.01
-    elif epoch < 50:
+    elif epoch < 50 * num:
         return 0.001
-    elif epoch < 75:
+    elif epoch < 75 * num:
         return 0.0001
     else:
         return 0.00001
 
-early_stopping = EarlyStopping(patience=10, restore_best_weights=True)
+#early_stopping = EarlyStopping(patience=20, restore_best_weights=True)
 
 # Create a custom learning rate callback
 learning_rate_scheduler = LearningRateScheduler(lr_schedule)
@@ -109,32 +122,61 @@ model = keras.Sequential()
 # Add input layer
 
 #GAN with one hot
-#model.add(keras.layers.Input(shape=(46,)))  # 18 input features
+model.add(keras.layers.Input(shape=(46,)))  # 18 input features
 
 #GAN
-model.add(keras.layers.Input(shape=(19,)))
+#model.add(keras.layers.Input(shape=(19,)))
 # Add hidden layers
+'''
+model.add(keras.layers.Dense(64, activation='relu'))
+model.add(keras.layers.BatchNormalization())
 
-#model.add(keras.layers.Dense(256, activation=keras.layers.LeakyReLU(alpha=0.1)))
-#model.add(keras.layers.BatchNormalization())
+model.add(keras.layers.Dense(128, activation='relu'))
+model.add(keras.layers.BatchNormalization())
+
+model.add(keras.layers.Dense(256, activation='relu'))
+model.add(keras.layers.BatchNormalization())
+
+model.add(keras.layers.Dense(512, activation='relu'))
+model.add(keras.layers.BatchNormalization())
+
+model.add(keras.layers.Dense(1024, activation='relu'))
+model.add(keras.layers.BatchNormalization())
+
+model.add(keras.layers.Dense(512, activation='relu'))
+model.add(keras.layers.BatchNormalization())
+
+model.add(keras.layers.Dense(256, activation='relu'))
+model.add(keras.layers.BatchNormalization())
 
 #model.add(keras.layers.Dense(128, activation=keras.layers.LeakyReLU(alpha=0.2)))
 model.add(keras.layers.Dense(128, activation='relu'))
 model.add(keras.layers.BatchNormalization())
 #model.add(keras.layers.Dropout(0.5))
+'''
 
-model.add(keras.layers.Dense(64, activation='relu'))
+#model.add(keras.layers.Dense(64, activation='relu'))
 #model.add(keras.layers.Dense(64, activation=keras.layers.LeakyReLU(alpha=0.2)))
-model.add(keras.layers.BatchNormalization())
+#model.add(keras.layers.BatchNormalization())
 #model.add(keras.layers.Dropout(0.5))
 
+#model.add(keras.layers.Dense(16, activation='relu'))
+#model.add(keras.layers.BatchNormalization())
+
+#model.add(keras.layers.Dense(32, activation='relu'))
+#model.add(keras.layers.BatchNormalization())
+
+#model.add(keras.layers.Dense(64, activation='relu'))
+#model.add(keras.layers.BatchNormalization())
+
 #model.add(keras.layers.Dense(32, activation=keras.layers.LeakyReLU(alpha=0.2)))
+#model.add(keras.layers.Dense(32, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
 model.add(keras.layers.Dense(32, activation='relu'))
 model.add(keras.layers.BatchNormalization())
 #model.add(keras.layers.Dropout(0.5))
 
+#model.add(keras.layers.Dense(16, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01)))
 model.add(keras.layers.Dense(16, activation='relu'))
-#model.add(keras.layers.Dense(16, activation=keras.layers.LeakyReLU(alpha=0.2)))
 model.add(keras.layers.BatchNormalization())
 #model.add(keras.layers.Dropout(0.5))
 # Add output layer
@@ -145,7 +187,7 @@ optimizer = keras.optimizers.Adam(learning_rate=0.01)
 model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
 # Train the model
-model.fit(X_train, Y_train, epochs=100, batch_size=32, validation_data=(X_test, Y_test), callbacks=[learning_rate_scheduler])
+model.fit(X_train, Y_train, epochs=ep, batch_size=64, validation_data=(X_test, Y_test), callbacks=[learning_rate_scheduler])
 #model.fit(X_train, Y_train, epochs=20, batch_size=32)
 
 # Evaluate the model
