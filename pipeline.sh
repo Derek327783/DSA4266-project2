@@ -2,6 +2,8 @@
 
 packages=("pandas" "argparse" "numpy" "matplotlib" "tensorflow")
 files=("detect.py" "best.h5")
+directory=$HOME/venv
+venv="python3.8-venv"
 
 for file in ${files[@]}; do
 	if [[ ! -f $file ]]; then
@@ -17,10 +19,16 @@ if command -v pip > /dev/null; then
 else
 	echo "echo pip not yet installed. Installing now..."
 	sudo apt-get update
-	sudo apt install python3-pip
+	sudo apt install -y python3-pip
 fi
 
-directory=$HOME/venv
+if ! dpkg -l | grep - q $venv; then
+    echo "'$venv' not yet installed. Installing now..."
+    sudo apt install -y $venv
+else 
+    echo "'$venv' is already installed."
+fi
+
 
 if [[ ! -d $directory ]]; then
 	echo "Directory '$directory' does not exist."
