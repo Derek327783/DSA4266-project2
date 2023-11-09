@@ -2,8 +2,9 @@
 
 packages=("pandas" "argparse" "numpy" "matplotlib" "tensorflow")
 files=("detect.py" "best.h5")
-files_to_delete=("output.csv")
-directory=$HOME/venv
+files_outputted=("output.csv")
+directory=./venv
+output_directory=./output
 venv="python3.8-venv"
 
 #echo usage is wrong
@@ -15,10 +16,10 @@ fi
 case $1 in
     "clean")
         echo "Cleaning files..."
-        for file in ${files_to_delete[@]}; do
-            if [[ -f $file ]]; then
+        for file in ${files_outputted[@]}; do
+            if [[ -f $output_directory/$file ]]; then
                 echo "$file found."
-                rm $file
+                rm $output_directory/$file
                 echo "$file removed."
             else
                 echo "$file not found."
@@ -28,6 +29,9 @@ case $1 in
         ;;
     "predict")
         echo "Setting up..."
+        if [[ ! -e $output_directory ]]; then
+            mkdir $output_directory
+        fi
         for file in ${files[@]}; do
             if [[ ! -f $file ]]; then
                 echo "'$file' not present."
@@ -94,9 +98,14 @@ case $1 in
         python3 ${files[0]}
 
         echo "Prediction files generated."
+        for file in ${files_outputted[@]}; do
+            if [[ -f $file ]]; then
+                mv $file $output_directory/$file
+            fi
+        done
         deactivate
         ;;
     *)
-        echo "Unknown $1: Please use either 'clean' or 'build'."
+        echo "Unknown $1: Please use either 'clean' or 'predict'."
         exit 1
 esac
