@@ -19,6 +19,7 @@ case $1 in
             if [[ -f $file ]]; then
                 echo "$file found."
                 rm $file
+                echo "$file removed."
             else
                 echo "$file not found."
             fi
