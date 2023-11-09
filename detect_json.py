@@ -26,7 +26,6 @@ def get_args():
     parser = argparse.ArgumentParser(description='predict with the neural networks')
     parser.add_argument('--model', type=str, default='./model/best.h5', help='model path')
     parser.add_argument('--data', type=str, default= './data/dataset0.json.gz', help='predict dataset path')
-    parser.add_argument('--data_label', type=bool, default=False, help='predict data have label or not')
     parser.add_argument('--data_output', type=str, default='./output/output.csv', help='predict data have label or not')
     
     return parser.parse_args()
@@ -51,7 +50,6 @@ if __name__ == '__main__':
     data = pd.DataFrame(parsed_data_list)
     #data = data.rename(columns={'0': 'Transcript_ID', '1': 'Position',"2":"Base_seq","3":"Sample_reads"})
     data.columns=['Transcript_ID', 'Position', 'Base_seq', 'Sample_reads']
-    data1 = pd.DataFrame(parsed_data_list)
 
     #print(data.head())
     # Mean and std
@@ -97,6 +95,8 @@ if __name__ == '__main__':
     model = load_model(args.model)
 
     Y_pred = model.predict(X_test)
-    data1['label'] = Y_pred
-    #df = pd.DataFrame(Y_pred)
-    data1.to_csv(args.data_output, index=False)
+    df = pd.DataFrame()
+    df['Transcript_id'] = data['Transcript_ID']
+    df['Position'] = data['Position']
+    df['Score'] = Y_pred
+    df.to_csv(args.data_output, index=False)
