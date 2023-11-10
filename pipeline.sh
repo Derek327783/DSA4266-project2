@@ -10,17 +10,7 @@ venv="python3.8-venv"
 
 #echo usage is wrong
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 [clean|predict] [dataset]"
-    exit 1
-fi
-
-if [ $# -eq 1 ] && [ $1 == "predict" ]; then
-    echo "Usage : $0 [predict] [dataset]"
-    exit 1
-fi
-
-if [ $# -eq 2 ] && [ $1 == "clean" ]; then
-    echo "Usage : $0 [clean]"
+    echo "Usage: $0 [clean|predict]"
     exit 1
 fi
 
@@ -113,7 +103,7 @@ case $1 in
         done
         echo "Setup complete."
         echo "Generating prediction files..."
-        python3 ${files[0]} $2
+        python3 ${files[0]}
 
         echo "Prediction files generated."
         for file in ${files_outputted[@]}; do
