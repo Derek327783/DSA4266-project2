@@ -1,7 +1,8 @@
 #!/bin/bash
 
 packages=("pandas" "argparse" "numpy" "matplotlib" "tensorflow")
-files=("detect.py" "best.h5")
+files=("detect_json.py" "best.h5")
+data_extension=*.json
 files_outputted=("output.csv")
 directory=./venv
 output_directory=./output
@@ -9,7 +10,17 @@ venv="python3.8-venv"
 
 #echo usage is wrong
 if [ $# -eq 0 ]; then
-    echo "Usage: '$0' [clean|predict]"
+    echo "Usage: $0 [clean|predict] [dataset]"
+    exit 1
+fi
+
+if [ $# -eq 1 ] && [ $1 == "predict" ]; then
+    echo "Usage : $0 [predict] [dataset]"
+    exit 1
+fi
+
+if [ $# -eq 2 ] && [ $1 == "clean" ]; then
+    echo "Usage : $0 [clean]"
     exit 1
 fi
 
@@ -40,6 +51,13 @@ case $1 in
                 echo "'$file' present."
             fi
         done
+
+        if [[ $2 != $data_extension ]]; then
+            echo "$2 is in wrong format. It needs to be $data_extension."
+            exit 1
+        else
+            echo "$2 is in right format."
+        fi
 
         if command -v pip > /dev/null; then
             echo "pip is already installed."
@@ -95,7 +113,7 @@ case $1 in
         done
         echo "Setup complete."
         echo "Generating prediction files..."
-        python3 ${files[0]}
+        python3 ${files[0]} $2
 
         echo "Prediction files generated."
         for file in ${files_outputted[@]}; do
