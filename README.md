@@ -1,13 +1,23 @@
 # DSA4266-project2
 
-## Options for configuring and running predictions
+## Files required for prediction
+
+1. `best.h5` model file
+2. dataset file with `.json` extension
+3. `detect_json.py` file
+4. `pipeline.sh` file
+
+**Ensure all the files are within the same directory.**
+**Do not change the file name for the `best.h5` and `detect_json.py` as the `pipeline.sh` file will check for those file names.**
+
+## Options for configuration
 
 - [Pipeline configuration and prediction execution](#pipeline-configuration-and-prediction-execution)
 - [Manual Configuration](#manual-configuration)
 
 ### Pipeline configuration and prediction execution
 
-1. Ensure the dataset, `.h5` file, `pipeline.sh` and `detect.py` are within the same directory.
+1. Ensure the dataset, `best.h5` file, `pipeline.sh` and `detect_json.py` are within the same directory.
 
 2. To allow the `pipeline.sh` file to be executable, type `chmod +x pipeline.sh`.
 
