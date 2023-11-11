@@ -14,6 +14,17 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+if [ $# -eq 1 ] && [ $1 == "predict" ]; then
+    echo "Usage : $0 predict <dataset file>"
+    echo "Please include the dataset file as well."
+    exit 1
+fi
+
+if [ $# -eq 2 ] && [ $1 == "clean" ]; then
+    echo "Usage : $0 [clean]"
+    exit 1
+fi
+
 case $1 in
     "clean")
         echo "Cleaning files..."
@@ -42,7 +53,7 @@ case $1 in
             fi
         done
 
-        if ! ls *$data_extension > /dev/null 2>1&; then
+        if ! ls *$data_extension > /dev/null 2>&1; then
             echo "Dataset is in wrong format. It needs to be $data_extension."
             exit 1
         else
@@ -103,7 +114,7 @@ case $1 in
         done
         echo "Setup complete."
         echo "Generating prediction files..."
-        python3 ${files[0]}
+        python3 ${files[0]} --model ${files[1]} --data $2 --data_output "output.csv"
 
         echo "Prediction files generated."
         for file in ${files_outputted[@]}; do
