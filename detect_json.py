@@ -24,9 +24,9 @@ def base_seq_one_hot(rows):
 #get arguments
 def get_args():
     parser = argparse.ArgumentParser(description='predict with the neural networks')
-    parser.add_argument('--model', type=str, default='./model/best.h5', help='model path')
-    parser.add_argument('--data', type=str, default= './data/dataset0.json.gz', help='predict dataset path')
-    parser.add_argument('--data_output', type=str, default='./output/output.csv', help='predict data have label or not')
+    parser.add_argument('--model', type=str, default='best.h5', help='model path')
+    parser.add_argument('--data', type=str, default= 'dataset0.json.gz', help='predict dataset path')
+    parser.add_argument('--data_output', type=str, default='output.csv', help='predict data have label or not')
     
     return parser.parse_args()
 
