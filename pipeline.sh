@@ -42,11 +42,11 @@ case $1 in
             fi
         done
 
-        if [[ $2 != $data_extension ]]; then
-            echo "$2 is in wrong format. It needs to be $data_extension."
+        if ! ls *$data_extension > /dev/null 2>1&; then
+            echo "Dataset is in wrong format. It needs to be $data_extension."
             exit 1
         else
-            echo "$2 is in right format."
+            echo "Dataset is in right format."
         fi
 
         if command -v pip > /dev/null; then
